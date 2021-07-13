@@ -2,14 +2,14 @@
 
 pragma solidity >=0.6.0 <0.8.0;
 
-import ".deps/Context.sol";
-import ".deps/Ownable.sol";
-import ".deps/SafeERC20.sol";
-import ".deps/IERC20.sol";
-import ".deps/SafeMath.sol";
-import ".deps/ReentrancyGuard.sol";
-import ".deps/IPancakeFactory.sol";
-import ".deps/IPancakeRouter02.sol";
+import "./deps/Context.sol";
+import "./deps/Ownable.sol";
+import "./deps/SafeERC20.sol";
+import "./deps/IERC20.sol";
+import "./deps/SafeMath.sol";
+import "./deps/ReentrancyGuard.sol";
+import "./deps/IPancakeFactory.sol";
+import "./deps/IPancakeRouter02.sol";
 
 
 contract PresaleContract is Context, Ownable, ReentrancyGuard{
