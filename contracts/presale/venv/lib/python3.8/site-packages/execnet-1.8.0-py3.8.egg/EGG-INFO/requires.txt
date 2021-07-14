@@ -1,0 +1,4 @@
+apipkg>=1.4
+
+[testing]
+pre-commit
