@@ -1,5 +1,5 @@
 from brownie import KupcakeRouter, accounts, Contract, interface
-import calendar;
+import calendar
 import time
 
 from brownie.network.contract import InterfaceConstructor

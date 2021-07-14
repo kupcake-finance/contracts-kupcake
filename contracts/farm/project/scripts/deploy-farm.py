@@ -24,19 +24,6 @@ def main():
         pass
     else:
         usdt_busd = {"main": "0xc15fa3e22c912a276550f3e5fe3b0deb87b55acd"}[current_network]
-        btcb_bnb = {"main": "0x7561eee90e24f3b348e1087a005f78b4c8453524"}[current_network]
-        eth_bnb = {"main": "0x70d8929d04b60af4fb9b58713ebcf18765ade422"}[current_network]
-        dai_busd = {"main": "0x3ab77e40340ab084c3e23be8e5a6f7afed9d41dc"}[current_network]
-        dot_bnb = {"main": "0xbcd62661a6b1ded703585d3af7d7649ef4dcdb5c"}[current_network]
-        cake_bnb = {"main": "0xa527a61703d82139f8a06bc30097cc9caa2df5a6"}[current_network]
-        usdc_busd = {"main": "0x680dd100e4b394bda26a59dd5c119a391e747d18"}[current_network]
-        usdt = {"main": "0x55d398326f99059ff775485246999027b3197955"}[current_network]
-        btcb = {"main": "0x7130d2a12b9bcbfae4f2634d864a1ee1ce3ead9c"}[current_network]
-        eth = {"main": "0x2170ed0880ac9a755fd29b2688956bd959f933f8"}[current_network]
-        dai = {"main": "0x1af3f329e8be154074d8769d1ffa4ee058b1dbc3"}[current_network]
-        dot = {"main": "0x7083609fce4d1d8dc0c979aab8c869ea2c873402"}[current_network]
-        cake = {"main": "0x0e09fabb73bd3ade0a17ecc321fd13a19e81ce82"}[current_network]
-        usdc = {"main": "0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d"}[current_network]
 
     def test_pools():
         assert get_pair(wbnb, busd, factory) == bnb_busd
