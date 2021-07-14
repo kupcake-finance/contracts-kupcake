@@ -8,31 +8,28 @@ import "./deps/SafeERC20.sol";
 import "./deps/IERC20.sol";
 import "./deps/SafeMath.sol";
 import "./deps/ReentrancyGuard.sol";
-import "./deps/IcupcakeFactory.sol";
-import "./deps/IcupcakeRouter02.sol";
+import "./deps/IPancakeFactory.sol";
+import "./deps/IPancakeRouter02.sol";
 
 
 contract PresaleContract is Context, Ownable, ReentrancyGuard{
 
-    // TODO keep ETH or switch with WETH
-    // TODO set WETH amount to add to the pool
-    // TODO set Reward token to add to the pool
 
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
     
     // info of each holder
-    struct UserInfo public {
+    struct UserInfo {
          
-        uint256 startBlock, // first time holder have been send eth
-        uint256 numberOfSwap,   // number of swap
-        uint256 ethAmount,  // total eth amount swaped by holder
-        uint256 rewardPending,  // total reward pending according to calculation
-        uint256 lastSwap    // last time holder send eth
+        uint256 startBlock;// first time holder have been send eth
+        uint256 numberOfSwap;  // number of swap
+        uint256 ethAmount; // total eth amount swaped by holder
+        uint256 rewardPending;  // total reward pending according to calculation
+        uint256 lastSwap;  // last time holder send eth
     }
 
     // kupcake router
-    IcupcakeRouter02 public kupcakeRouter;
+    IPancakeRouter02 public kupcakeRouter;
 
     // token that will be release at releaseTimeStamp
     IERC20 public rewardToken;
@@ -40,6 +37,8 @@ contract PresaleContract is Context, Ownable, ReentrancyGuard{
     // amount calculation of reward token : (eth x priceRatio) / priceRatioAgainst
     uint256 public priceRatio = 10000;
     uint256 public priceRatioAgainst = 10000;
+    
+    mapping (address => UserInfo) public userInfo;
 
     // number of holders that swap
     uint256 public holders;
@@ -62,15 +61,15 @@ contract PresaleContract is Context, Ownable, ReentrancyGuard{
     constructor(IERC20 _rewardToken, uint256 _releaseTimeStamp, address _routerAddress) public {
         rewardToken = _rewardToken;
         releaseTimeStamp = _releaseTimeStamp;
-        kupcakeRouter = IcupcakeRouter02(_routerAddress);
+        kupcakeRouter = IPancakeRouter02(_routerAddress);
     }
 
     // to add eth to the pool and calculate pending rewards
     function swapBusdToToken() public payable nonReentrant{
-        UserInfo[_msgSender()] storage user;
+        UserInfo storage user = userInfo[msg.sender];
         uint256 amount = msg.value;
         require(amount>=0, "value must be superior to 0.");
-        require(block.timestamp < releaseTimeStamp, "the presale is finished")
+        require(block.timestamp < releaseTimeStamp, "the presale is finished");
         ethTotalSwaped = ethTotalSwaped.add(amount);
         uint256 rewardTokenAmount = amount.mul(priceRatio).div(priceRatioAgainst);
         user.startBlock==0?user.startBlock = block.timestamp:user.startBlock = user.startBlock;
@@ -87,25 +86,28 @@ contract PresaleContract is Context, Ownable, ReentrancyGuard{
 
     // to claims rewards since releaseTimeStamp
     function claimRewards() public {
-        UserInfo[_msgSender()] storage user;
+        UserInfo storage user = userInfo[msg.sender];
         require(block.timestamp >= releaseTimeStamp, "not yet time to withdraw");
         require(user.rewardPending>0, "nothing to withdraw");
         require(getBalanceRewardToken()>= user.rewardPending, "not enough found in contract.");
         if(isPoolDeployed == false){
             address factoryAddress = kupcakeRouter.factory();
-            IcupcakeFactory Factory = IcupcakeFactory(factoryAddress);
+            IPancakeFactory Factory = IPancakeFactory(factoryAddress);
             Factory.createPair(address(rewardToken),kupcakeRouter.WETH());
-            uint256 wethLiquidity= 1; //TODO set Weth to the pool
-            uint256 rewardTokenLiquidity = 1 ; //TODO set amont token
-            IERC20(kupcakeRouter.WETH()).approve(address(kupcakeRouter), wethLiquidity);
-            IERC20(rewardToken).approve(address(kupcakeRouter), rewardTokenLiquidity);
+            uint256 ethToLiquify = ethTotalSwaped.mul(70000000000000000000).div(100000000000000000000);
+            uint256 ethToDev = ethTotalSwaped.sub(ethToLiquify);
+
+            IERC20(kupcakeRouter.WETH()).approve(address(kupcakeRouter), ethToLiquify);
+            IERC20(rewardToken).approve(address(kupcakeRouter), ethToLiquify);
             kupcakeRouter.addLiquidityETH(
                 address(rewardToken),
-                rewardTokenLiquidity,
-                rewardTokenLiquidity,
+                ethToLiquify,
+                ethToLiquify,
+                ethToLiquify,
                 owner(),
                 block.timestamp
-                )
+                );
+            payable(address(owner())).transfer(ethToDev);
             isPoolDeployed = true;
         }
         IERC20(rewardToken).approve(address(_msgSender()), user.rewardPending);
@@ -172,7 +174,7 @@ contract PresaleContract is Context, Ownable, ReentrancyGuard{
 
     // owner: set router address
     function setRouterAddress(address _routerAddress) public onlyOwner {
-        kupcakeRouter = IcupcakeRouter02(_routerAddress);
+        kupcakeRouter = IPancakeRouter02(_routerAddress);
 
     }
     
