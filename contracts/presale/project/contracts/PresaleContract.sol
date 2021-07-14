@@ -137,26 +137,34 @@ contract PresaleContract is Context, Ownable, ReentrancyGuard{
         user.rewardPending = 0;
     }
     
-    // owner: to withdraw amount of eth
+    // owner: to withdraw amount of eth in case of problem
     function withdraw(uint256 _amount) public onlyOwner nonReentrant{
+        // We can only withdraw way after the presale is over.
+        require(block.timestamp >= releaseTimeStamp + 10000)
         require(address(this).balance >= _amount, "not enough balance to withdraw ");
         payable(_msgSender()).transfer(_amount);
     }
 
-    // owner: to withdraw amount of reward token
+    // owner: to withdraw amount of reward token in case of problem
     function withdrawRewardToken(uint256 _amount) public onlyOwner nonReentrant{
+        // We can only withdraw way after the presale is over.
+        require(block.timestamp >= releaseTimeStamp + 10000)
         require(_amount > 0 && getBalanceRewardToken()>= _amount, "not enough balance to withdraw.");
         rewardToken.safeTransfer(_msgSender(), _amount);
     }
     
     // owner: to withdraw all amount of eth
     function withdrawAll() public onlyOwner nonReentrant{
-         require(address(this).balance >= 0, "nothing to withdraw ");
+        // We can only withdraw way after the presale is over.
+        require(block.timestamp >= releaseTimeStamp + 10000)
+        require(address(this).balance >= 0, "nothing to withdraw ");
         payable(_msgSender()).transfer(address(this).balance);
     }
     
-    // owner: to withdraw amount of reward token
+    // owner: to withdraw an amount of reward token
     function withdrawAllRewardToken() public onlyOwner nonReentrant{
+        // We can only withdraw way after the presale is over.
+        require(block.timestamp >= releaseTimeStamp + 10000)
         require(getBalanceRewardToken() >= 0, "nothing to withdraw");
         IERC20(rewardToken).transfer(_msgSender(), getBalanceRewardToken());
     }
@@ -189,6 +197,7 @@ contract PresaleContract is Context, Ownable, ReentrancyGuard{
 
     // owner : set release timestamp
     function setReleaseTimeStamp(uint256 _releaseTimeStamp) public onlyOwner {
+        require(_releaseTimeStamp >= block.timestamp)
         releaseTimeStamp = _releaseTimeStamp;
     }
     
@@ -203,5 +212,4 @@ contract PresaleContract is Context, Ownable, ReentrancyGuard{
 
     // enable contract to recive ETH
     receive() external payable {}
-  
 }
