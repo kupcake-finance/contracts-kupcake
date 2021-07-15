@@ -53,7 +53,7 @@ contract MasterChefV2 is Ownable, ReentrancyGuard {
     }
 
     // The KUP TOKEN!
-    KupToken public kup;
+    KupCakeToken public kup;
     // Dev address.
     address public devaddr;
     // KUP tokens created per block.
@@ -80,7 +80,7 @@ contract MasterChefV2 is Ownable, ReentrancyGuard {
     event UpdateEmissionRate(address indexed user, uint256 goosePerBlock);
 
     constructor(
-        KupToken _kup,
+        KupCakeToken _kup,
         address _devaddr,
         address _feeAddress,
         uint256 _kupPerBlock,
