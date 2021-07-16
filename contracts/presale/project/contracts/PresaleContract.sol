@@ -34,8 +34,8 @@ contract PresaleContract is Context, Ownable, ReentrancyGuard{
     IERC20 public rewardToken;
 
     // amount calculation of reward token : (eth x priceRatio) / priceRatioAgainst
-    uint256 public priceRatio = 10000;
-    uint256 public priceRatioAgainst = 10000;
+    uint256 public priceRatio = 1100;
+    uint256 public priceRatioAgainst = 10;
     
     // userInfo
     mapping (address => UserInfo) public userInfo;
@@ -59,7 +59,7 @@ contract PresaleContract is Context, Ownable, ReentrancyGuard{
     uint256 public ethToLiquify;
     
     // presale limite
-    uint public hardcap = 13000 ether;
+    uint public hardcap = 20000 ether;
 
     constructor(IERC20 _rewardToken, uint256 _releaseTimeStamp , address _routerAddress) public {
         rewardToken = _rewardToken;
@@ -123,7 +123,7 @@ contract PresaleContract is Context, Ownable, ReentrancyGuard{
 
         // Adding liquidity
         IERC20(rewardToken).approve(address(kupcakeRouter), ethToLiquify);
-        kupcakeRouter.addLiquidityETH.value(ethToLiquify)(
+        kupcakeRouter.addLiquidityETH{value: ethToLiquify}(
             address(rewardToken),
             ethToLiquify,
             0,
@@ -179,8 +179,23 @@ contract PresaleContract is Context, Ownable, ReentrancyGuard{
     }
     
     // get data for the frontend
-    function getData() public view returns( uint256[11] memory ){
-        return  [priceRatio,priceRatioAgainst, getBalanceRewardToken(), getBalance(), rewardToken.balanceOf(address(_msgSender())), address(_msgSender()).balance, rewardTokenTotalToSwap, ethTotalSwaped, holders, hardcap, releaseTimeStamp ];
+    function getData() public view returns( uint256[14] memory ){
+        UserInfo storage user = userInfo[msg.sender];
+        return  [
+            priceRatio,
+            priceRatioAgainst, 
+            getBalanceRewardToken(), getBalance(), 
+            rewardToken.balanceOf(address(_msgSender())), 
+            address(_msgSender()).balance, 
+            rewardTokenTotalToSwap, 
+            ethTotalSwaped, 
+            holders, 
+            hardcap, 
+            releaseTimeStamp,
+            user.numberOfSwap,
+            user.ethAmount,
+            user.rewardPending
+        ];
     }
     
     // reward token balance of the pool 
